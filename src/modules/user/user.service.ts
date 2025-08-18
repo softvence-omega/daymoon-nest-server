@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Profile, ProfileDocument } from './schemas/profile.schema';
 import { Shop } from './schemas/shop.schema';
+import { UpdateShopDto } from './dto/update-shop.dto';
 
 @Injectable()
 export class UserService {
@@ -137,4 +138,35 @@ export class UserService {
   async getAllUsers() {
     return this.userModel.find().select('-password');
   }
+
+  // update shop
+  async updateShopDetails(userId: string, update: UpdateShopDto): Promise<Shop> {
+    const updatePayload: Partial<Shop> = {};
+
+    if (update.personalDetails) {
+      updatePayload.personalDetails = { ...update.personalDetails };
+    }
+
+    if (update.shopDetails) {
+      updatePayload.shopDetails = { ...update.shopDetails };
+    }
+
+    if (update.refund_policy) {
+      updatePayload.refund_policy = [...update.refund_policy];
+    }
+
+    const shop = await this.shopModel.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      { $set: updatePayload },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new NotFoundException('Shop not found for this user');
+    }
+
+    return shop;
+  }
+
+
 }

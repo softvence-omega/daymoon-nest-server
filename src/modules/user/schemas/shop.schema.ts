@@ -19,10 +19,10 @@ export class Shop extends Document {
     default: {},
   })
   personalDetails: {
-    userName: string;
-    userEmail: string;
-    userAddress: string;
-    mobileNumber: string;
+    userName?: string;
+    userEmail?: string;
+    userAddress?: string;
+    mobileNumber?: string;
   };
 
   @Prop({
@@ -55,10 +55,10 @@ export class Shop extends Document {
     ],
     default: [],
   })
-  refund_policy: Array<{
-    minimumDays: number;
-    reductionPercentage: number;
-    appliedOnProducts: string[];
+  refund_policy?: Array<{
+    minimumDays?: number;
+    reductionPercentage?: number;
+    appliedOnProducts?: string[];
   }>;
 }
 
