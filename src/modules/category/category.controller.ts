@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guard/roles.guard';
+import { Roles } from 'src/common/decorator/roles.decorator';
+import { Role } from '../user/schemas/user.schema';
 
 @Controller('category')
 export class CategoryController {
@@ -11,7 +15,7 @@ export class CategoryController {
     return this.categoryService.create(dto);
   }
 
-  @Get()
+  @Get('all-categories')
   findAll() {
     return this.categoryService.findAll();
   }
@@ -22,11 +26,15 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
   update(@Param('id') id: string, @Body() dto: Partial<CreateCategoryDto>) {
     return this.categoryService.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
   }
