@@ -31,3 +31,22 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// ✅ Add virtuals here
+UserSchema.virtual('profile', {
+  ref: 'Profile',            // Model name
+  localField: '_id',         // User._id
+  foreignField: 'userId',    // Profile.userId
+  justOne: true,
+});
+
+UserSchema.virtual('shop', {
+  ref: 'Shop',               // Model name
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: true,
+});
+
+// ✅ Ensure virtuals are included in JSON and object outputs
+UserSchema.set('toObject', { virtuals: true });
+UserSchema.set('toJSON', { virtuals: true });

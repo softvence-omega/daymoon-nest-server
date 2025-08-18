@@ -1,16 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { Role, User } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Profile, ProfileDocument } from './schemas/profile.schema';
+import { Shop } from './schemas/shop.schema';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
+    @InjectModel(Shop.name) private shopModel: Model<Shop>,
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -33,6 +35,36 @@ export class UserService {
       socialLinks: [],
     });
 
+    // ✅ Auto-create default shop if Seller
+    if (savedUser.role === Role.Seller) {
+      await this.shopModel.create({
+        userId: savedUser._id,
+        shopName: `${savedUser.fullName}'s Shop`,
+        personalDetails: {
+          userName: savedUser.fullName,
+          userEmail: savedUser.email,
+          userAddress: '',
+          mobileNumber: '',
+        },
+        shopDetails: {
+          shopName: '',
+          shopType: '',
+          shopLogo: '',
+          shopBanner: '',
+          shopAddress: '',
+          shopMobileNumber: '',
+          businessDesc: '',
+          storeDesc: '',
+          country: '',
+          socialMediaLink: [],
+          productCategory: [],
+          productShipping: '',
+          transactionMethodId: '',
+        },
+        refund_policy: [],
+      });
+    }
+
     return savedUser;
   }
 
@@ -54,6 +86,21 @@ export class UserService {
       return this.userModel.findById(objectId).exec();
     }
     return this.userModel.findById(objectId).select('-password').exec();
+  }
+
+  async findByIdWithRelations(userId: string, includePassword = false): Promise<User | null> {
+    if (!Types.ObjectId.isValid(userId)) return null;
+    const objectId = new Types.ObjectId(userId);
+    const query = this.userModel
+      .findById(objectId)
+      .populate('profile')
+      .populate('shop');
+
+    if (!includePassword) {
+      query.select('-password');
+    }
+
+    return query.exec();
   }
 
   async findByResetToken(token: string) {
