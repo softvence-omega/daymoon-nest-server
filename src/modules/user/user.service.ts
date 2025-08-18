@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Profile, ProfileDocument } from './schemas/profile.schema';
 import { Shop } from './schemas/shop.schema';
+import { UpdateShopDto } from './dto/update-shop.dto';
 
 @Injectable()
 export class UserService {
@@ -88,7 +89,10 @@ export class UserService {
     return this.userModel.findById(objectId).select('-password').exec();
   }
 
-  async findByIdWithRelations(userId: string, includePassword = false): Promise<User | null> {
+  async findByIdWithRelations(
+    userId: string,
+    includePassword = false,
+  ): Promise<User | null> {
     if (!Types.ObjectId.isValid(userId)) return null;
     const objectId = new Types.ObjectId(userId);
     const query = this.userModel
@@ -129,12 +133,48 @@ export class UserService {
         },
       },
     );
-    
+
     return user;
   }
 
   // Get all users (admin)
   async getAllUsers() {
     return this.userModel.find().select('-password');
+  }
+
+  // update shop
+  async updateShopDetails(
+    userId: string,
+    update: UpdateShopDto,
+  ): Promise<Shop> {
+    const updatePayload: Partial<Shop> = {};
+
+    if (update.shopName) {
+      updatePayload.shopName = update.shopName;
+    }
+
+    if (update.personalDetails) {
+      updatePayload.personalDetails = { ...update.personalDetails };
+    }
+
+    if (update.shopDetails) {
+      updatePayload.shopDetails = { ...update.shopDetails };
+    }
+
+    if (update.refund_policy) {
+      updatePayload.refund_policy = [...update.refund_policy];
+    }
+
+    const shop = await this.shopModel.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      { $set: updatePayload },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new NotFoundException('Shop not found for this user');
+    }
+
+    return shop;
   }
 }

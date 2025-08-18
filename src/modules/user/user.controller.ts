@@ -4,7 +4,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
+  Put,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { AuthUser } from '../auth/jwt.strategy';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from './schemas/user.schema';
+import { UpdateShopDto } from './dto/update-shop.dto';
 
 @Controller('user')
 export class UserController {
@@ -52,6 +55,14 @@ export class UserController {
     return this.userService.updateProfile(req.user.userId, body);
   }
 
+  @Put('shop/:userId')
+  async updateShop(
+    @Param('userId') userId: string,
+    @Body() updateShopDto: UpdateShopDto,
+  ) {
+    return this.userService.updateShopDetails(userId, updateShopDto);
+  }
+
   // Get all users (admin only)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
@@ -59,4 +70,5 @@ export class UserController {
   async getAllUsers() {
     return this.userService.getAllUsers();
   }
+
 }
