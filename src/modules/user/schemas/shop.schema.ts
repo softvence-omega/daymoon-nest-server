@@ -27,7 +27,6 @@ export class Shop extends Document {
 
   @Prop({
     type: {
-      shopName: String,
       shopType: String,
       shopLogo: String,
       shopBanner: String,

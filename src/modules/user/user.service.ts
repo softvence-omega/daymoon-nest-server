@@ -89,7 +89,10 @@ export class UserService {
     return this.userModel.findById(objectId).select('-password').exec();
   }
 
-  async findByIdWithRelations(userId: string, includePassword = false): Promise<User | null> {
+  async findByIdWithRelations(
+    userId: string,
+    includePassword = false,
+  ): Promise<User | null> {
     if (!Types.ObjectId.isValid(userId)) return null;
     const objectId = new Types.ObjectId(userId);
     const query = this.userModel
@@ -130,7 +133,7 @@ export class UserService {
         },
       },
     );
-    
+
     return user;
   }
 
@@ -140,8 +143,15 @@ export class UserService {
   }
 
   // update shop
-  async updateShopDetails(userId: string, update: UpdateShopDto): Promise<Shop> {
+  async updateShopDetails(
+    userId: string,
+    update: UpdateShopDto,
+  ): Promise<Shop> {
     const updatePayload: Partial<Shop> = {};
+
+    if (update.shopName) {
+      updatePayload.shopName = update.shopName;
+    }
 
     if (update.personalDetails) {
       updatePayload.personalDetails = { ...update.personalDetails };
@@ -167,6 +177,4 @@ export class UserService {
 
     return shop;
   }
-
-
 }

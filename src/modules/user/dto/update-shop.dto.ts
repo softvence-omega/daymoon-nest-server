@@ -15,7 +15,6 @@ class PersonalDetailsDto {
 }
 
 class ShopDetailsDto {
-  @IsOptional() @IsString() shopName?: string;
   @IsOptional() @IsString() shopType?: string;
   @IsOptional() @IsString() shopLogo?: string;
   @IsOptional() @IsString() shopBanner?: string;
@@ -43,12 +42,22 @@ class RefundPolicyDto {
 }
 
 export class UpdateShopDto {
-  @IsOptional() @ValidateNested() @Type(() => PersonalDetailsDto)
+  @IsOptional()
+  @IsString()
+  shopName?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PersonalDetailsDto)
   personalDetails?: PersonalDetailsDto;
 
-  @IsOptional() @ValidateNested() @Type(() => ShopDetailsDto)
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ShopDetailsDto)
   shopDetails?: ShopDetailsDto;
 
-  @IsOptional() @ValidateNested({ each: true }) @Type(() => RefundPolicyDto)
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => RefundPolicyDto)
   refund_policy?: RefundPolicyDto[];
 }
