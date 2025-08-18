@@ -13,7 +13,7 @@ export class Profile extends Document {
   email: string;
 
   @Prop({ default: '' })
-  image: string;
+  imageUrl?: string;
 
   @Prop({ default: '' })
   bio: string;

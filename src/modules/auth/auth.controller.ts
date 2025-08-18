@@ -1,16 +1,36 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageFileFilter, multerStorage } from 'src/utils/multer';
+import { CloudinaryService } from 'src/utils/cloudinary.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post('signup')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: multerStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
   async signup(
     @Body()
     body: {
@@ -19,11 +39,22 @@ export class AuthController {
       fullName: string;
       role?: Role;
     },
+    @UploadedFile() file?: Express.Multer.File, // optional
   ) {
+    let imageUrl = '';
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadImage(
+        file.originalname,
+        file.path,
+      );
+      imageUrl = uploadResult.secure_url;
+    }
+
     return this.authService.signup(
       body.email,
       body.password,
       body.fullName,
+      imageUrl,
       body.role,
     );
   }

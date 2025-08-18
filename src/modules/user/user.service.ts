@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Role, User } from './schemas/user.schema';
+import { User } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Profile, ProfileDocument } from './schemas/profile.schema';
@@ -16,58 +16,112 @@ export class UserService {
     @InjectModel(Shop.name) private shopModel: Model<Shop>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const newUser = new this.userModel({
-      ...dto,
-      password: hashedPassword,
-      role: dto.role || 'Buyer',
-    });
+  // async create(dto: CreateUserDto): Promise<User> {
+  //   const hashedPassword = await bcrypt.hash(dto.password, 10);
+  //   const newUser = new this.userModel({
+  //     ...dto,
+  //     password: hashedPassword,
+  //     role: dto.role || 'Buyer',
+  //   });
 
-    const savedUser = await newUser.save();
+  //   const savedUser = await newUser.save();
 
-    // Create profile automatically
-    await this.profileModel.create({
-      userId: savedUser._id,
-      fullName: savedUser.fullName,
-      email: savedUser.email,
-      image: '',
-      bio: '',
-      socialLinks: [],
-    });
+  //   // Create profile automatically
+  //   await this.profileModel.create({
+  //     userId: savedUser._id,
+  //     fullName: savedUser.fullName,
+  //     email: savedUser.email,
+  //     image: '',
+  //     bio: '',
+  //     socialLinks: [],
+  //   });
 
-    // ✅ Auto-create default shop if Seller
-    if (savedUser.role === Role.Seller) {
-      await this.shopModel.create({
-        userId: savedUser._id,
-        shopName: `${savedUser.fullName}'s Shop`,
-        personalDetails: {
-          userName: savedUser.fullName,
-          userEmail: savedUser.email,
-          userAddress: '',
-          mobileNumber: '',
-        },
-        shopDetails: {
-          shopName: '',
-          shopType: '',
-          shopLogo: '',
-          shopBanner: '',
-          shopAddress: '',
-          shopMobileNumber: '',
-          businessDesc: '',
-          storeDesc: '',
-          country: '',
-          socialMediaLink: [],
-          productCategory: [],
-          productShipping: '',
-          transactionMethodId: '',
-        },
-        refund_policy: [],
-      });
-    }
+  //   // ✅ Auto-create default shop if Seller
+  //   if (savedUser.role === Role.Seller) {
+  //     await this.shopModel.create({
+  //       userId: savedUser._id,
+  //       shopName: `${savedUser.fullName}'s Shop`,
+  //       personalDetails: {
+  //         userName: savedUser.fullName,
+  //         userEmail: savedUser.email,
+  //         userAddress: '',
+  //         mobileNumber: '',
+  //       },
+  //       shopDetails: {
+  //         shopName: '',
+  //         shopType: '',
+  //         shopLogo: '',
+  //         shopBanner: '',
+  //         shopAddress: '',
+  //         shopMobileNumber: '',
+  //         businessDesc: '',
+  //         storeDesc: '',
+  //         country: '',
+  //         socialMediaLink: [],
+  //         productCategory: [],
+  //         productShipping: '',
+  //         transactionMethodId: '',
+  //       },
+  //       refund_policy: [],
+  //     });
+  //   }
 
-    return savedUser;
-  }
+  //   return savedUser;
+  // }
+
+  async create(dto: CreateUserDto, imageUrl: string) {
+  const hashedPassword = await bcrypt.hash(dto.password, 10);
+  const newUser = new this.userModel({
+    ...dto,
+    password: hashedPassword,
+    role: dto.role || 'Buyer',
+  });
+
+  const savedUser = await newUser.save();
+
+  await this.profileModel.create({
+    userId: savedUser._id,
+    fullName: savedUser.fullName,
+    email: savedUser.email,
+    image: imageUrl || '',
+    bio: '',
+    socialLinks: [],
+  });
+
+  return savedUser;
+}
+
+async updateProfileWithImage(
+  userId: string,
+  updateData: Partial<User>,
+  imageUrl?: string,
+) {
+  // Update the user
+  const user = await this.userModel.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    { new: true },
+  );
+  if (!user) throw new NotFoundException('User not found');
+
+  // Only pick fields that exist on Profile
+  const profileUpdate: Partial<Profile> = {};
+  if (updateData.fullName) profileUpdate.fullName = updateData.fullName;
+  if (updateData.email) profileUpdate.email = updateData.email;
+  // Add more mappings if your Profile has other fields to update
+
+  if (imageUrl) profileUpdate.imageUrl = imageUrl;
+
+  await this.profileModel.findOneAndUpdate(
+    { userId },
+    { $set: profileUpdate },
+    { new: true },
+  );
+
+  return user;
+}
+
+
 
   async findByEmail(
     email: string,
@@ -115,27 +169,27 @@ export class UserService {
   }
 
   // Update user profile
-  async updateProfile(userId: string, updateData: Partial<User>) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      { new: true },
-    );
-    if (!user) throw new NotFoundException('User not found');
+  // async updateProfile(userId: string, updateData: Partial<User>) {
+  //   const user = await this.userModel.findByIdAndUpdate(
+  //     userId,
+  //     { $set: updateData },
+  //     { new: true },
+  //   );
+  //   if (!user) throw new NotFoundException('User not found');
 
-    // Update profile too
-    await this.profileModel.findOneAndUpdate(
-      { userId },
-      {
-        $set: {
-          fullName: updateData.fullName,
-          email: updateData.email,
-        },
-      },
-    );
+  //   // Update profile too
+  //   await this.profileModel.findOneAndUpdate(
+  //     { userId },
+  //     {
+  //       $set: {
+  //         fullName: updateData.fullName,
+  //         email: updateData.email,
+  //       },
+  //     },
+  //   );
 
-    return user;
-  }
+  //   return user;
+  // }
 
   // Get all users (admin)
   async getAllUsers() {

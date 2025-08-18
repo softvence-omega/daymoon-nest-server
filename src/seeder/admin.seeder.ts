@@ -7,12 +7,15 @@ export async function seedAdmin(userService: UserService) {
   const existingAdmin = await userService.findByEmail(adminEmail, true);
 
   if (!existingAdmin) {
-    await userService.create({
-      email: 'admin@gmail.com',
-      password: '123456',
-      fullName: 'Admin',
-      role: Role.Admin,
-    });
+    await userService.create(
+      {
+        email: 'admin@gmail.com',
+        password: '123456',
+        fullName: 'Admin',
+        role: Role.Admin,
+      },
+      'https://res.cloudinary.com/dymow3weu/image/upload/v1709999999/default_admin_image.png',
+    );
     console.log('✅ Admin created successfully!');
   } else {
     console.log('ℹ️ Admin already exists!');
