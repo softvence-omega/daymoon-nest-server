@@ -11,6 +11,7 @@ import {
   Put,
   Request,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,7 +23,7 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from './schemas/user.schema';
 import { UpdateShopDto } from './dto/update-shop.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/multer';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -128,12 +129,44 @@ export class UserController {
   // }
 
   @Put('shop/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Seller)
+  @UseInterceptors(AnyFilesInterceptor())
   async updateShop(
     @Param('userId') userId: string,
-    @Body() updateShopDto: UpdateShopDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('data') data: string,
   ) {
-    return this.userService.updateShopDetails(userId, updateShopDto);
+    const parsedData: UpdateShopDto = JSON.parse(data) as UpdateShopDto;
+
+    // Handle images
+    const uploadedImages: Record<string, string> = {};
+    for (const file of files) {
+      const result = await this.cloudinaryService.uploadImage(file);
+
+      if (file.fieldname === 'storeLogo') {
+        uploadedImages.storeLogo = result.secure_url;
+      }
+      if (file.fieldname === 'storeBanner') {
+        uploadedImages.storeBanner = result.secure_url;
+      }
+    }
+
+    return this.userService.updateShopDetails(userId, {
+      ...parsedData,
+      ...uploadedImages,
+    });
   }
+
+  // @Put('shop/:userId')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.Admin, Role.Seller)
+  // async updateShop(
+  //   @Param('userId') userId: string,
+  //   @Body() updateShopDto: UpdateShopDto,
+  // ) {
+  //   return this.userService.updateShopDetails(userId, updateShopDto);
+  // }
 
   // Get all users (admin only)
   @UseGuards(JwtAuthGuard, RolesGuard)

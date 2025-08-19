@@ -234,7 +234,7 @@ export class UserService {
     const shop = await this.shopModel.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       { $set: updatePayload },
-      { new: true, upsert: true },
+      { new: true },
     );
 
     if (!shop) {

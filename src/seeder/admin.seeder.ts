@@ -1,7 +1,9 @@
 import { Role } from 'src/modules/user/schemas/user.schema';
 import { UserService } from '../modules/user/user.service';
 
-export async function seedAdmin(userService: UserService) {
+export async function seedAdmin(
+  userService: UserService
+) {
   const adminEmail = 'admin@gmail.com';
 
   const existingAdmin = await userService.findByEmail(adminEmail, true);
