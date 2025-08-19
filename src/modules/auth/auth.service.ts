@@ -20,8 +20,19 @@ export class AuthService {
   ) {}
 
   // Signup
-  async signup(email: string, password: string, fullName: string, role?: Role) {
-    return this.userService.create({ email, password, fullName, role });
+  async signup(
+    email: string,
+    password: string,
+    fullName: string,
+    imageUrl: string,
+    role?: Role,
+    phone?: string,
+    companyName?: string,
+  ) {
+    return this.userService.create(
+      { email, password, fullName, role, phone, companyName },
+      imageUrl,
+    );
   }
 
   // Login

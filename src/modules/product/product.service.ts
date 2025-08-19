@@ -18,7 +18,7 @@ export class ProductService {
   }
 
   async findOne(id: string) {
-    const product = await this.productModel.findById(id).populate('categoryId').populate('subCategoryId').exec();
+    const product = await this.productModel.findById(id).populate('categoryId').populate('subCategoryId').populate('variantIds').exec();
     if (!product) throw new NotFoundException('Product not found');
     return product;
   }

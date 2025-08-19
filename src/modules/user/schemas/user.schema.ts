@@ -23,6 +23,12 @@ export class User extends Document {
   @Prop({ type: String, enum: RolesArray, default: Role.Buyer })
   role?: Role;
 
+  @Prop({ type: String, default: '' })
+  phone: string;
+
+  @Prop({ type: String, default: '' })
+  companyName: string;
+
   @Prop()
   resetPasswordOtp?: string;
 
@@ -50,3 +56,4 @@ UserSchema.virtual('shop', {
 // ✅ Ensure virtuals are included in JSON and object outputs
 UserSchema.set('toObject', { virtuals: true });
 UserSchema.set('toJSON', { virtuals: true });
+

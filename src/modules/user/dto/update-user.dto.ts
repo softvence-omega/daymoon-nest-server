@@ -1,17 +1,19 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+// src/modules/user/dto/update-user.dto.ts
+import { IsEmail, IsEnum, IsOptional, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { Role, RolesArray } from '../schemas/user.schema';
 
-export class CreateUserDto {
+export class UpdateUserDto {
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6)
-  password: string;
+  password?: string;
 
-  @IsNotEmpty()
-  fullName: string;
+  @IsOptional()
+  fullName?: string;
 
   @IsOptional()
   @IsEnum(RolesArray)
@@ -27,10 +29,8 @@ export class CreateUserDto {
   role?: Role;
 
   @IsOptional()
-  @IsString()
   phone?: string;
 
   @IsOptional()
-  @IsString()
   companyName?: string;
 }

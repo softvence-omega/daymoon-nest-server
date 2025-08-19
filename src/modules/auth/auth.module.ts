@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { MailModule } from '../mail/mail.module';
+import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MailModule } from '../mail/mail.module';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    CloudinaryModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

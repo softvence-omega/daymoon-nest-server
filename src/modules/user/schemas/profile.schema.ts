@@ -12,14 +12,24 @@ export class Profile extends Document {
   @Prop()
   email: string;
 
-  @Prop({ default: '' })
-  image: string;
+  @Prop({
+    default:
+      process.env.DEFAULT_PROFILE_IMAGE ||
+      'https://res.cloudinary.com/dpgcpei5u/image/upload/v1747546759/interviewProfile_jvo9jl.jpg',
+  })
+  imageUrl?: string;
 
   @Prop({ default: '' })
   bio: string;
 
   @Prop({ default: [] })
   socialLinks: string[];
+
+  @Prop({ type: String, default: '' })
+  phone: string;
+
+  @Prop({ type: String, default: '' })
+  companyName: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

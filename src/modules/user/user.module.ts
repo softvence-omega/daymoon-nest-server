@@ -5,16 +5,19 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { Profile, ProfileSchema } from './schemas/profile.schema';
 import { Shop, ShopSchema } from './schemas/shop.schema';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
+import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Profile.name, schema: ProfileSchema },
-      { name: Shop.name, schema: ShopSchema }
+      { name: Shop.name, schema: ShopSchema },
     ]),
+    CloudinaryModule,
   ],
-  providers: [UserService],
+  providers: [UserService, CloudinaryService],
   exports: [UserService],
   controllers: [UserController],
 })
