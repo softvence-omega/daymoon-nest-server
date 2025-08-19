@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { Role, User } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Profile, ProfileDocument } from './schemas/profile.schema';
@@ -69,18 +69,21 @@ export class UserService {
   //   return savedUser;
   // }
 
-  async create(dto: CreateUserDto, imageUrl: string) {
+  async create(dto: CreateUserDto, imageUrl?: string) {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    // 1️⃣ Create user
     const newUser = new this.userModel({
       ...dto,
       password: hashedPassword,
-      role: dto.role || 'Buyer',
+      role: dto.role || Role.Buyer,
       phone: dto.phone || '',
       companyName: dto.companyName || '',
     });
 
     const savedUser = await newUser.save();
 
+    // 2️⃣ Auto-create profile
     await this.profileModel.create({
       userId: savedUser._id,
       fullName: savedUser.fullName,
@@ -88,9 +91,32 @@ export class UserService {
       imageUrl: imageUrl || process.env.DEFAULT_PROFILE_IMAGE,
       bio: '',
       socialLinks: [],
-      phone: dto.phone || '',
-      companyName: dto.companyName || '',
+      phone: savedUser.phone,
+      companyName: savedUser.companyName,
     });
+
+    // 3️⃣ Auto-create shop if user is Seller
+    if (savedUser.role === Role.Seller) {
+      await this.shopModel.create({
+        userId: savedUser._id,
+        businessName: savedUser.fullName + "'s Shop",
+        phoneNumber: savedUser.phone || '',
+        businessType: '',
+        businessDesc: '',
+        country: '',
+        storeLogo: '',
+        storeBanner: '',
+        storeDesc: '',
+        socialMediaLinks: [],
+        productCategory: [],
+        productShipping: '',
+        refundPolicy: [],
+        paymentMethod: '',
+        accountHolderName: '',
+        accountNumber: '',
+        acceptPrivacyPolicy: false,
+      });
+    }
 
     return savedUser;
   }
@@ -203,28 +229,12 @@ export class UserService {
     userId: string,
     update: UpdateShopDto,
   ): Promise<Shop> {
-    const updatePayload: Partial<Shop> = {};
-
-    if (update.shopName) {
-      updatePayload.shopName = update.shopName;
-    }
-
-    if (update.personalDetails) {
-      updatePayload.personalDetails = { ...update.personalDetails };
-    }
-
-    if (update.shopDetails) {
-      updatePayload.shopDetails = { ...update.shopDetails };
-    }
-
-    if (update.refund_policy) {
-      updatePayload.refund_policy = [...update.refund_policy];
-    }
+    const updatePayload: Partial<Shop> = { ...update };
 
     const shop = await this.shopModel.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       { $set: updatePayload },
-      { new: true },
+      { new: true, upsert: true },
     );
 
     if (!shop) {

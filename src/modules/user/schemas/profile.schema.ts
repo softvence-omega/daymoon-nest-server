@@ -25,11 +25,11 @@ export class Profile extends Document {
   @Prop({ default: [] })
   socialLinks: string[];
 
-  @Prop({ default: '' })
-  phone?: string;
+  @Prop({ type: String, default: '' })
+  phone: string;
 
-  @Prop({ default: '' })
-  companyName?: string;
+  @Prop({ type: String, default: '' })
+  companyName: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

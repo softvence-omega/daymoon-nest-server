@@ -6,44 +6,42 @@ export class Shop extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
+  // Business details
+  @Prop({ required: true })
+  businessName: string;
+
   @Prop()
-  shopName: string;
+  businessType?: string;
 
-  @Prop({
-    type: {
-      userName: String,
-      userEmail: String,
-      userAddress: String,
-      mobileNumber: String,
-    },
-    default: {},
-  })
-  personalDetails: {
-    userName?: string;
-    userEmail?: string;
-    userAddress?: string;
-    mobileNumber?: string;
-  };
+  @Prop()
+  businessDesc?: string;
 
-  @Prop({
-    type: {
-      shopType: String,
-      shopLogo: String,
-      shopBanner: String,
-      shopAddress: String,
-      shopMobileNumber: String,
-      businessDesc: String,
-      storeDesc: String,
-      country: String,
-      socialMediaLink: [String],
-      productCategory: [String],
-      productShipping: String,
-      transactionMethodId: String,
-    },
-    default: {},
-  })
-  shopDetails: any;
+  @Prop()
+  country?: string;
 
+  @Prop()
+  phoneNumber?: string;
+
+  // Store details
+  @Prop()
+  storeLogo?: string;
+
+  @Prop()
+  storeBanner?: string;
+
+  @Prop()
+  storeDesc?: string;
+
+  @Prop({ type: [String], default: [] })
+  socialMediaLinks?: string[];
+
+  @Prop({ type: [String], default: [] })
+  productCategory?: string[];
+
+  @Prop()
+  productShipping?: string;
+
+  // Refund/return policy (already existing)
   @Prop({
     type: [
       {
@@ -59,6 +57,22 @@ export class Shop extends Document {
     reductionPercentage?: number;
     appliedOnProducts?: string[];
   }>;
+
+  // Payment setup
+  @Prop()
+  paymentMethod?: string;
+
+  @Prop()
+  accountHolderName?: string;
+
+  @Prop()
+  accountNumber?: string;
+
+  @Prop()
+  taxId?: string;
+
+  @Prop({ default: false })
+  acceptPrivacyPolicy: boolean;
 }
 
 export const ShopSchema = SchemaFactory.createForClass(Shop);

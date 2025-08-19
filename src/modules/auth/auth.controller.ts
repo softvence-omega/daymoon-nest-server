@@ -38,6 +38,8 @@ export class AuthController {
       password: string;
       fullName: string;
       role?: Role;
+      phone?: string;
+      companyName?: string;
     },
     @UploadedFile() file?: Express.Multer.File,
   ) {
@@ -53,6 +55,8 @@ export class AuthController {
       body.fullName,
       imageUrl,
       body.role,
+      body.phone,
+      body.companyName,
     );
   }
 

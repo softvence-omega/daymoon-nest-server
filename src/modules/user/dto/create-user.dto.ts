@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { Role, RolesArray } from '../schemas/user.schema';
 
@@ -27,8 +27,10 @@ export class CreateUserDto {
   role?: Role;
 
   @IsOptional()
+  @IsString()
   phone?: string;
 
   @IsOptional()
+  @IsString()
   companyName?: string;
 }
