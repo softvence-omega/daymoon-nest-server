@@ -16,7 +16,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
-import { Role } from '../user/schemas/user.schema';
+import { Role } from '../user/schemas/user.schema'; 
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 

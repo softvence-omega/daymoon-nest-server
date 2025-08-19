@@ -24,7 +24,7 @@ import { Role } from './schemas/user.schema';
 import { UpdateShopDto } from './dto/update-shop.dto';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter } from 'src/utils/multer';
+import { imageFileFilter } from '../../utils/multer';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { memoryStorage } from 'multer';
