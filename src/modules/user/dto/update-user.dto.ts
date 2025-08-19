@@ -27,4 +27,10 @@ export class UpdateUserDto {
     return value;
   })
   role?: Role;
+
+  @IsOptional()
+  phone?: string;
+
+  @IsOptional()
+  companyName?: string;
 }

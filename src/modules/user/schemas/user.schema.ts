@@ -23,6 +23,12 @@ export class User extends Document {
   @Prop({ type: String, enum: RolesArray, default: Role.Buyer })
   role?: Role;
 
+  @Prop({ default: '' })
+  phone?: string;
+
+  @Prop({ default: '' })
+  companyName?: string;
+
   @Prop()
   resetPasswordOtp?: string;
 

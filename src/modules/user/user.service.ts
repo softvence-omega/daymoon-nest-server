@@ -75,6 +75,8 @@ export class UserService {
       ...dto,
       password: hashedPassword,
       role: dto.role || 'Buyer',
+      phone: dto.phone || '',
+      companyName: dto.companyName || '',
     });
 
     const savedUser = await newUser.save();
@@ -86,39 +88,42 @@ export class UserService {
       imageUrl: imageUrl || process.env.DEFAULT_PROFILE_IMAGE,
       bio: '',
       socialLinks: [],
+      phone: dto.phone || '',
+      companyName: dto.companyName || '',
     });
 
     return savedUser;
   }
 
   async updateProfileWithImage(
-  userId: string,
-  updateData: Partial<User>,
-  imageUrl?: string,
-) {
-  const user = await this.userModel.findByIdAndUpdate(
-    userId,
-    { $set: updateData },
-    { new: true },
-  );
-  if (!user) throw new NotFoundException('User not found');
+    userId: string,
+    updateData: Partial<User>,
+    imageUrl?: string,
+  ) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true },
+    );
+    if (!user) throw new NotFoundException('User not found');
 
-  // build profile update
-  const profileUpdate: Partial<Profile> = {};
-  if (updateData.fullName) profileUpdate.fullName = updateData.fullName;
-  if (updateData.email) profileUpdate.email = updateData.email;
-  if (imageUrl) profileUpdate.imageUrl = imageUrl; // optional update
+    // build profile update
+    const profileUpdate: Partial<Profile> = {};
+    if (updateData.fullName) profileUpdate.fullName = updateData.fullName;
+    if (updateData.email) profileUpdate.email = updateData.email;
+    if (updateData.phone) profileUpdate.phone = updateData.phone;
+    if (updateData.companyName)
+      profileUpdate.companyName = updateData.companyName;
+    if (imageUrl) profileUpdate.imageUrl = imageUrl; // optional update
 
-  const profile = await this.profileModel.findOneAndUpdate(
-    { userId: new mongoose.Types.ObjectId(userId) },
-    { $set: profileUpdate },
-    { new: true },
-  );
+    const profile = await this.profileModel.findOneAndUpdate(
+      { userId: new mongoose.Types.ObjectId(userId) },
+      { $set: profileUpdate },
+      { new: true },
+    );
 
-  return { user, profile };
-}
-
-
+    return { user, profile };
+  }
 
   async findByEmail(
     email: string,
