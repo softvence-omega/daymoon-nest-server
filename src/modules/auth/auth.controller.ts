@@ -25,39 +25,37 @@ export class AuthController {
   ) {}
 
   @Post('signup')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: multerStorage,
-      fileFilter: imageFileFilter,
-    }),
-  )
-  async signup(
-    @Body()
-    body: {
-      email: string;
-      password: string;
-      fullName: string;
-      role?: Role;
-    },
-    @UploadedFile() file?: Express.Multer.File, // optional
-  ) {
-    let imageUrl = '';
-    if (file) {
-      const uploadResult = await this.cloudinaryService.uploadImage(
-        file.originalname,
-        file.path,
-      );
-      imageUrl = uploadResult.secure_url;
-    }
-
-    return this.authService.signup(
-      body.email,
-      body.password,
-      body.fullName,
-      imageUrl,
-      body.role,
-    );
+@UseInterceptors(
+  FileInterceptor('image', {
+    storage: multerStorage,
+    fileFilter: imageFileFilter,
+  }),
+)
+async signup(
+  @Body()
+  body: {
+    email: string;
+    password: string;
+    fullName: string;
+    role?: Role;
+  },
+  @UploadedFile() file?: Express.Multer.File,
+) {
+  let imageUrl = process.env.DEFAULT_PROFILE_IMAGE || '';
+  if (file) {
+    const uploadResult = await this.cloudinaryService.uploadImage(file);
+    imageUrl = uploadResult.secure_url;
   }
+
+  return this.authService.signup(
+    body.email,
+    body.password,
+    body.fullName,
+    imageUrl,
+    body.role,
+  );
+}
+
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {

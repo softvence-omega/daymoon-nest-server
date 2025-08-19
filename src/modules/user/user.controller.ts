@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,9 +23,10 @@ import { Role } from './schemas/user.schema';
 import { UpdateShopDto } from './dto/update-shop.dto';
 import { CloudinaryService } from 'src/utils/cloudinary.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter, multerStorage } from 'src/utils/multer';
+import { imageFileFilter } from 'src/utils/multer';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { memoryStorage } from 'multer';
 
 @Controller('user')
 export class UserController {
@@ -36,21 +38,17 @@ export class UserController {
   @Post('create')
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: multerStorage,
+      storage: memoryStorage,
       fileFilter: imageFileFilter,
     }),
   )
   async createUser(
     @Body() body: CreateUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    let imageUrl = '';
+    let imageUrl = process.env.DEFAULT_PROFILE_IMAGE || '';
     if (file) {
-      // Pass both name and path (optionally folder)
-      const uploadResult = await this.cloudinaryService.uploadImage(
-        file.originalname,
-        file.path,
-      );
+      const uploadResult = await this.cloudinaryService.uploadImage(file);
       imageUrl = uploadResult.secure_url;
     }
     return this.userService.create(body, imageUrl);
@@ -60,23 +58,33 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: multerStorage,
+      storage: memoryStorage(),
       fileFilter: imageFileFilter,
     }),
   )
   async updateProfile(
     @Request() req,
-    @Body() body: UpdateUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
+    @Body('data') data?: string, // JSON string from form-data
   ) {
+    // Parse JSON safely with type
+    let body: UpdateUserDto = {};
+    if (data) {
+      try {
+        body = JSON.parse(data) as UpdateUserDto;
+      } catch (err) {
+        throw new BadRequestException('Invalid JSON in data field', err);
+      }
+    }
+
+    // Upload image if present
     let imageUrl: string | undefined;
     if (file) {
-      const uploadResult = await this.cloudinaryService.uploadImage(
-        file.originalname,
-        file.path,
-      );
+      const uploadResult = await this.cloudinaryService.uploadImage(file);
       imageUrl = uploadResult.secure_url;
     }
+
+    // Update profile
     return this.userService.updateProfileWithImage(
       req.user.userId,
       body,

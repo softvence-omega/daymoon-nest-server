@@ -12,7 +12,9 @@ export class Profile extends Document {
   @Prop()
   email: string;
 
-  @Prop({ default: '' })
+  @Prop({
+    default: process.env.DEFAULT_PROFILE_IMAGE || 'https://res.cloudinary.com/dpgcpei5u/image/upload/v1747546759/interviewProfile_jvo9jl.jpg',
+  })
   imageUrl?: string;
 
   @Prop({ default: '' })

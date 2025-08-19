@@ -1,15 +1,6 @@
-import { diskStorage } from 'multer';
-import path from 'path';
+import { memoryStorage } from 'multer';
 
-export const multerStorage = diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(process.cwd(), 'uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
+export const multerStorage = memoryStorage();
 
 export const imageFileFilter = (
   req: any,

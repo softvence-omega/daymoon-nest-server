@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
@@ -70,33 +70,32 @@ export class UserService {
   // }
 
   async create(dto: CreateUserDto, imageUrl: string) {
-  const hashedPassword = await bcrypt.hash(dto.password, 10);
-  const newUser = new this.userModel({
-    ...dto,
-    password: hashedPassword,
-    role: dto.role || 'Buyer',
-  });
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const newUser = new this.userModel({
+      ...dto,
+      password: hashedPassword,
+      role: dto.role || 'Buyer',
+    });
 
-  const savedUser = await newUser.save();
+    const savedUser = await newUser.save();
 
-  await this.profileModel.create({
-    userId: savedUser._id,
-    fullName: savedUser.fullName,
-    email: savedUser.email,
-    image: imageUrl || '',
-    bio: '',
-    socialLinks: [],
-  });
+    await this.profileModel.create({
+      userId: savedUser._id,
+      fullName: savedUser.fullName,
+      email: savedUser.email,
+      imageUrl: imageUrl || process.env.DEFAULT_PROFILE_IMAGE,
+      bio: '',
+      socialLinks: [],
+    });
 
-  return savedUser;
-}
+    return savedUser;
+  }
 
-async updateProfileWithImage(
+  async updateProfileWithImage(
   userId: string,
   updateData: Partial<User>,
   imageUrl?: string,
 ) {
-  // Update the user
   const user = await this.userModel.findByIdAndUpdate(
     userId,
     { $set: updateData },
@@ -104,21 +103,19 @@ async updateProfileWithImage(
   );
   if (!user) throw new NotFoundException('User not found');
 
-  // Only pick fields that exist on Profile
+  // build profile update
   const profileUpdate: Partial<Profile> = {};
   if (updateData.fullName) profileUpdate.fullName = updateData.fullName;
   if (updateData.email) profileUpdate.email = updateData.email;
-  // Add more mappings if your Profile has other fields to update
+  if (imageUrl) profileUpdate.imageUrl = imageUrl; // optional update
 
-  if (imageUrl) profileUpdate.imageUrl = imageUrl;
-
-  await this.profileModel.findOneAndUpdate(
-    { userId },
+  const profile = await this.profileModel.findOneAndUpdate(
+    { userId: new mongoose.Types.ObjectId(userId) },
     { $set: profileUpdate },
     { new: true },
   );
 
-  return user;
+  return { user, profile };
 }
 
 

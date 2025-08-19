@@ -1,41 +1,44 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import fs from 'fs/promises';
-import config from '../config/config';
+import { ConfigService } from '@nestjs/config';
+import { Readable } from 'stream';
 
 @Injectable()
 export class CloudinaryService {
-  constructor() {
+  constructor(private configService: ConfigService) {
     cloudinary.config({
-      cloud_name: config.cloudinary_name,
-      api_key: config.cloudinary_api_key,
-      api_secret: config.cloudinary_api_secret,
+      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
+      api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
+      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
     });
   }
 
-  private async deleteFile(filePath: string) {
-    try {
-      await fs.access(filePath);
-      await fs.unlink(filePath);
-    } catch (err: any) {
-      console.error(`Error deleting file ${filePath}: ${err}`);
-    }
+  async uploadImage(file: Express.Multer.File, folder = 'profiles'): Promise<UploadApiResponse> {
+    return new Promise<UploadApiResponse>((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          public_id: `${Date.now()}-${file.originalname}`,
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) {
+            return reject(new Error(error.message || 'Cloudinary upload failed'));
+          }
+          if (!result) {
+            return reject(new Error('No result returned from Cloudinary'));
+          }
+          resolve(result as UploadApiResponse);
+        },
+      );
+
+      Readable.from(file.buffer).pipe(upload);
+    });
   }
 
-  async uploadImage(name: string, filePath: string, folder = 'profiles'): Promise<UploadApiResponse> {
-    try {
-      await fs.access(filePath);
-
-      const uploadResult = await cloudinary.uploader.upload(filePath, {
-        public_id: `${folder}/${name}-${Date.now()}`,
-        resource_type: 'image',
-      });
-
-      await this.deleteFile(filePath);
-      return uploadResult;
-    } catch (error: any) {
-      await this.deleteFile(filePath);
-      throw new Error(`Image upload failed: ${error}`);
-    }
+  async deleteImage(publicId: string): Promise<{ result: string }> {
+    return cloudinary.uploader.destroy(publicId);
   }
 }
