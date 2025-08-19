@@ -14,9 +14,8 @@ import { Role } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter } from 'src/utils/multer';
+import { imageFileFilter, multerStorage } from 'src/utils/multer';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
-import { memoryStorage } from 'multer';
 
 @Controller('auth')
 export class AuthController {
@@ -28,8 +27,7 @@ export class AuthController {
   @Post('signup')
   @UseInterceptors(
     FileInterceptor('image', {
-      // storage: multerStorage,
-      storage: memoryStorage,
+      storage: multerStorage,
       fileFilter: imageFileFilter,
     }),
   )
