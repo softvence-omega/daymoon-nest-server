@@ -41,6 +41,7 @@ export class AuthController {
       phone?: string;
       companyName?: string;
     },
+    // @UploadedFile() file?: Express.Multer.File,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     let imageUrl = process.env.DEFAULT_PROFILE_IMAGE || '';
