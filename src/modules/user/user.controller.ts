@@ -21,7 +21,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from './schemas/user.schema';
 import { UpdateShopDto } from './dto/update-shop.dto';
-import { CloudinaryService } from 'src/utils/cloudinary.service';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/multer';
 import { CreateUserDto } from './dto/create-user.dto';

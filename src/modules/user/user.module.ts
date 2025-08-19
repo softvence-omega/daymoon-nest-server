@@ -5,8 +5,8 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { Profile, ProfileSchema } from './schemas/profile.schema';
 import { Shop, ShopSchema } from './schemas/shop.schema';
-import { CloudinaryService } from 'src/utils/cloudinary.service';
-import { CloudinaryModule } from 'src/utils/cloudinary.module';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
+import { CloudinaryModule } from 'src/utils/cloudinary/cloudinary.module';
 
 @Module({
   imports: [

@@ -15,7 +15,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter, multerStorage } from 'src/utils/multer';
-import { CloudinaryService } from 'src/utils/cloudinary.service';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 
 @Controller('auth')
 export class AuthController {
@@ -25,37 +25,36 @@ export class AuthController {
   ) {}
 
   @Post('signup')
-@UseInterceptors(
-  FileInterceptor('image', {
-    storage: multerStorage,
-    fileFilter: imageFileFilter,
-  }),
-)
-async signup(
-  @Body()
-  body: {
-    email: string;
-    password: string;
-    fullName: string;
-    role?: Role;
-  },
-  @UploadedFile() file?: Express.Multer.File,
-) {
-  let imageUrl = process.env.DEFAULT_PROFILE_IMAGE || '';
-  if (file) {
-    const uploadResult = await this.cloudinaryService.uploadImage(file);
-    imageUrl = uploadResult.secure_url;
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: multerStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async signup(
+    @Body()
+    body: {
+      email: string;
+      password: string;
+      fullName: string;
+      role?: Role;
+    },
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    let imageUrl = process.env.DEFAULT_PROFILE_IMAGE || '';
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadImage(file);
+      imageUrl = uploadResult.secure_url;
+    }
+
+    return this.authService.signup(
+      body.email,
+      body.password,
+      body.fullName,
+      imageUrl,
+      body.role,
+    );
   }
-
-  return this.authService.signup(
-    body.email,
-    body.password,
-    body.fullName,
-    imageUrl,
-    body.role,
-  );
-}
-
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
