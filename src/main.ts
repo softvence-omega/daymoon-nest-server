@@ -6,7 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  
   // Enable global validation with transformation
   app.useGlobalPipes(
     new ValidationPipe({

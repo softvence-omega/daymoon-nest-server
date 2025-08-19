@@ -14,7 +14,7 @@ import { Role } from '../user/schemas/user.schema';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter, multerStorage } from 'src/utils/multer';
+import { imageFileFilter, multerStorage } from '../../utils/multer';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 
 @Controller('auth')
