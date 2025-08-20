@@ -4,7 +4,7 @@ export const multerStorage = memoryStorage();
 
 export const imageFileFilter = (
   req: any,
-  file: Express.Multer['File'],
+  file: Express.Multer.File,
   cb: (error: Error | null, acceptFile: boolean) => void,
 ) => {
   if (!file.mimetype.startsWith('image/')) {
@@ -15,7 +15,7 @@ export const imageFileFilter = (
 
 export const pdfFileFilter = (
   req: any,
-  file: Express.Multer['File'],
+  file: Express.Multer.File,
   cb: (error: Error | null, acceptFile: boolean) => void,
 ) => {
   if (file.mimetype !== 'application/pdf') {
