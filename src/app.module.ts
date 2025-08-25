@@ -9,6 +9,9 @@ import { ProductModule } from "./modules/product/product.module";
 import { VariantModule } from "./modules/variant/variant.module";
 import { SubCategoryModule } from "./modules/sub-category/sub-category.module";
 import { CategoryModule } from "./modules/category/category.module";
+import { OrderModule } from "./modules/order/order.module";
+import { PaymentModule } from "./modules/payment/payment.module";
+import { ShipmentModule } from "./modules/shipment/shipment.module";
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { CategoryModule } from "./modules/category/category.module";
     VariantModule,
     SubCategoryModule,
     CategoryModule,
+    OrderModule,
+    PaymentModule,
+    ShipmentModule,
     
     // Load environment variables
     ConfigModule.forRoot({ isGlobal: true }),
