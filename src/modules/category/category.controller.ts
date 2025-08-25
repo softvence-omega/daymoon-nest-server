@@ -1,17 +1,45 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from '../user/schemas/user.schema';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private categoryService: CategoryService) {}
+  constructor(
+    private categoryService: CategoryService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post('create-category')
-  create(@Body() dto: CreateCategoryDto) {
+  @UseInterceptors(FileInterceptor('image'))
+  async create(
+    @Body('data') data: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const dto: CreateCategoryDto = JSON.parse(data) as CreateCategoryDto;
+
+    if (file) {
+      const result = await this.cloudinaryService.uploadImage(file);
+      dto.image = result.secure_url;
+    }
+
     return this.categoryService.create(dto);
   }
 
@@ -28,7 +56,19 @@ export class CategoryController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Seller)
-  update(@Param('id') id: string, @Body() dto: Partial<CreateCategoryDto>) {
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @Param('id') id: string,
+    @Body('data') data: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const dto: UpdateCategoryDto = JSON.parse(data) as UpdateCategoryDto;
+
+    if (file) {
+      const result = await this.cloudinaryService.uploadImage(file);
+      dto.image = result.secure_url;
+    }
+
     return this.categoryService.update(id, dto);
   }
 
